@@ -30,8 +30,8 @@ const Login: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4">
-      <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border p-2">
-        <div className="bg-indigo-600 p-8 text-center text-white rounded-2xl">
+      <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border">
+        <div className="bg-indigo-600 p-8 text-center text-white">
           <h1 className="text-4xl font-extrabold tracking-tight">FabricFlow</h1>
           <p className="mt-2 text-indigo-100">Intelligent Textile Management</p>
         </div>
