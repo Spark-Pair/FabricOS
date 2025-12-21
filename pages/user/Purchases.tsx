@@ -97,11 +97,11 @@ const Purchases: React.FC = () => {
           <h2 className="text-4xl font-black text-slate-800 tracking-tight">Procurement</h2>
           <p className="text-slate-500 mt-2 font-medium italic">Restocking inventory for <span className="text-indigo-600 font-bold">{selectedBranch?.name}</span> outlet.</p>
         </div>
-        <div className="flex gap-3.5">
-          <button onClick={() => setIsModalOpen(true)} className="h-full flex items-center gap-3.5 px-5 py-3.5 bg-indigo-500 border border-transparent text-white font-medium text-sm tracking-wider rounded-2xl hover:bg-indigo-600 transition-all duration-300">
+        <div className="flex gap-3.5 items-center">
+          <button onClick={() => setIsModalOpen(true)} className="grow flex items-center gap-3.5 px-5 py-3.5 bg-indigo-600 border border-indigo-600 text-white font-medium text-sm tracking-wider rounded-2xl hover:bg-indigo-600 transition-all duration-300">
             <Plus size={18} /> Add Record
           </button>
-          <button className="h-full flex items-center gap-3.5 px-5 py-3.5 bg-white border border-slate-200 text-slate-600 font-medium text-sm tracking-wider rounded-2xl hover:bg-slate-100 transition-all duration-300">
+          <button className="grow flex items-center gap-3.5 px-5 py-3.5 bg-white border border-slate-200 text-slate-600 font-medium text-sm tracking-wider rounded-2xl hover:bg-slate-100 transition-all duration-300">
             <Filter size={16} /> Advanced Filters
           </button>
         </div>
