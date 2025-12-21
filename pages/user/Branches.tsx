@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTenant } from '../../contexts/TenantContext';
 import { db } from '../../lib/db';
-import { Plus, MapPin, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Modal } from '../../components/Modal';
+import { Plus, MapPin } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const Branches: React.FC = () => {
@@ -59,29 +59,26 @@ const Branches: React.FC = () => {
         ))}
       </div>
 
-      <AnimatePresence>
-        {isModalOpen && (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="bg-white rounded-[2rem] w-full max-w-sm overflow-hidden shadow-2xl">
-              <div className="p-8 border-b flex justify-between items-center bg-indigo-50/30">
-                <h3 className="text-xl font-black">Add Branch</h3>
-                <button onClick={() => setIsModalOpen(false)}><X /></button>
-              </div>
-              <form onSubmit={handleCreateBranch} className="p-8 space-y-4">
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-500 uppercase">Branch Name</label>
-                  <input required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} type="text" className="w-full p-3 bg-slate-50 border rounded-xl outline-none" placeholder="e.g. Model Town Branch" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-500 uppercase">Address</label>
-                  <textarea required value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} className="w-full p-3 bg-slate-50 border rounded-xl outline-none" rows={3} />
-                </div>
-                <button type="submit" className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold mt-4">Create Branch</button>
-              </form>
-            </motion.div>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Add Branch"
+        subtitle="Outlet Management"
+        icon={<MapPin className="w-5 h-5" />}
+        maxWidth="max-w-sm"
+      >
+        <form onSubmit={handleCreateBranch} className="p-8 space-y-4">
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-slate-500 uppercase">Branch Name</label>
+            <input required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} type="text" className="w-full p-3 bg-slate-50 border rounded-xl outline-none" placeholder="e.g. Model Town Branch" />
           </div>
-        )}
-      </AnimatePresence>
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-slate-500 uppercase">Address</label>
+            <textarea required value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} className="w-full p-3 bg-slate-50 border rounded-xl outline-none" rows={3} />
+          </div>
+          <button type="submit" className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold mt-4">Create Branch</button>
+        </form>
+      </Modal>
     </div>
   );
 };

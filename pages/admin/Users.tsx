@@ -1,10 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Plus, Search, Edit3, MoreVertical, CreditCard, X } from 'lucide-react';
+import { Plus, Search, Edit3, CreditCard, Store } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { db } from '../../lib/db';
 import { UserProfile, UserRole } from '../../types';
+import { Modal } from '../../components/Modal';
 
 const Users: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -125,43 +125,42 @@ const Users: React.FC = () => {
         </table>
       </div>
 
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white rounded-3xl w-full max-w-xl overflow-hidden shadow-2xl">
-            <div className="p-6 border-b flex justify-between items-center bg-indigo-50/50">
-              <h3 className="text-xl font-bold text-slate-800">Shop Registration</h3>
-              <button onClick={() => setIsModalOpen(false)}><X className="w-5 h-5 text-slate-400"/></button>
-            </div>
-            <form onSubmit={handleCreateUser} className="p-8 grid grid-cols-2 gap-6">
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-500 uppercase">Shop Name</label>
-                <input required value={formData.shopName} onChange={e => setFormData({...formData, shopName: e.target.value})} type="text" className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="e.g. Silk Haven" />
-              </div>
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-500 uppercase">Owner Name</label>
-                <input required value={formData.ownerName} onChange={e => setFormData({...formData, ownerName: e.target.value})} type="text" className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Full Name" />
-              </div>
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-500 uppercase">Username</label>
-                <input required value={formData.username} onChange={e => setFormData({...formData, username: e.target.value})} type="text" className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="login_id" />
-              </div>
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-500 uppercase">Password</label>
-                <input required value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} type="password" className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="••••••••" />
-              </div>
-              <div className="col-span-2 space-y-1">
-                <label className="text-xs font-bold text-slate-500 uppercase">Phone Number</label>
-                <input required value={formData.phoneNumber} onChange={e => setFormData({...formData, phoneNumber: e.target.value})} type="tel" className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="03xx-xxxxxxx" />
-              </div>
-              
-              <div className="col-span-2 flex justify-end gap-3 pt-6 border-t mt-4">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-3 text-slate-500 font-bold hover:text-slate-800">Cancel</button>
-                <button type="submit" className="px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-100">Create Tenant</button>
-              </div>
-            </form>
-          </motion.div>
-        </div>
-      )}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Shop Registration"
+        subtitle="Tenant Onboarding"
+        icon={<Store className="w-6 h-6" />}
+        maxWidth="max-w-xl"
+      >
+        <form onSubmit={handleCreateUser} className="p-8 grid grid-cols-2 gap-6">
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-slate-500 uppercase">Shop Name</label>
+            <input required value={formData.shopName} onChange={e => setFormData({...formData, shopName: e.target.value})} type="text" className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="e.g. Silk Haven" />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-slate-500 uppercase">Owner Name</label>
+            <input required value={formData.ownerName} onChange={e => setFormData({...formData, ownerName: e.target.value})} type="text" className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Full Name" />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-slate-500 uppercase">Username</label>
+            <input required value={formData.username} onChange={e => setFormData({...formData, username: e.target.value})} type="text" className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="login_id" />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-slate-500 uppercase">Password</label>
+            <input required value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} type="password" className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="••••••••" />
+          </div>
+          <div className="col-span-2 space-y-1">
+            <label className="text-xs font-bold text-slate-500 uppercase">Phone Number</label>
+            <input required value={formData.phoneNumber} onChange={e => setFormData({...formData, phoneNumber: e.target.value})} type="tel" className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="03xx-xxxxxxx" />
+          </div>
+          
+          <div className="col-span-2 flex justify-end gap-3 pt-6 border-t mt-4">
+            <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-3 text-slate-500 font-bold hover:text-slate-800">Cancel</button>
+            <button type="submit" className="px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-100">Create Tenant</button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };

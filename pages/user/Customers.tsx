@@ -2,9 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { db } from '../../lib/db';
-// Fix: Added Users to the imported icons from lucide-react
-import { Search, Plus, User, Users, Phone, DollarSign, X, MoreHorizontal, MessageSquare } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Modal } from '../../components/Modal';
+import { Plus, User, Users, Phone, MoreHorizontal, MessageSquare } from 'lucide-react';
+import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 
 const Customers: React.FC = () => {
@@ -96,39 +96,34 @@ const Customers: React.FC = () => {
         ))}
       </div>
 
-      <AnimatePresence>
-        {isModalOpen && (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="bg-white rounded-[2.5rem] w-full max-w-sm overflow-hidden shadow-2xl border border-white/20">
-              <div className="p-10 border-b border-slate-50 flex justify-between items-center bg-indigo-50/30">
-                <h3 className="text-2xl font-black text-slate-800">Add Customer</h3>
-                <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-white rounded-full transition-all">
-                  <X className="w-6 h-6 text-slate-400" />
-                </button>
-              </div>
-              <form onSubmit={handleCreateCustomer} className="p-10 space-y-6">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Full Name</label>
-                  <div className="relative">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
-                    <input required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} type="text" className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 font-bold" placeholder="e.g. John Doe" />
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Phone Number</label>
-                  <div className="relative">
-                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
-                    <input required value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} type="tel" className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 font-bold" placeholder="03xx-xxxxxxx" />
-                  </div>
-                </div>
-                <button type="submit" className="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black mt-6 shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95">
-                  Save Customer
-                </button>
-              </form>
-            </motion.div>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Add Customer"
+        subtitle="Customer Relationship"
+        icon={<User className="w-6 h-6" />}
+        maxWidth="max-w-sm"
+      >
+        <form onSubmit={handleCreateCustomer} className="p-10 space-y-6">
+          <div className="space-y-1">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Full Name</label>
+            <div className="relative">
+              <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
+              <input required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} type="text" className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 font-bold" placeholder="e.g. John Doe" />
+            </div>
           </div>
-        )}
-      </AnimatePresence>
+          <div className="space-y-1">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Phone Number</label>
+            <div className="relative">
+              <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
+              <input required value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} type="tel" className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 font-bold" placeholder="03xx-xxxxxxx" />
+            </div>
+          </div>
+          <button type="submit" className="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black mt-6 shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95">
+            Save Customer
+          </button>
+        </form>
+      </Modal>
     </div>
   );
 };

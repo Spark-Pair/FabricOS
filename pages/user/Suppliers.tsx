@@ -2,19 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { db } from '../../lib/db';
-import { 
-  Plus, 
-  X, 
-  Store, 
-  Truck, 
-  Phone, 
-  MoreHorizontal, 
-  MessageSquare, 
-  User, 
-  Search,
-  ArrowRight
-} from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Modal } from '../../components/Modal';
+import { Plus, Store, Truck, Phone, MoreHorizontal, MessageSquare, ArrowRight } from 'lucide-react';
+import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 
 const Suppliers: React.FC = () => {
@@ -114,67 +104,54 @@ const Suppliers: React.FC = () => {
         ))}
       </div>
 
-      <AnimatePresence>
-        {isModalOpen && (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
-            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="bg-white rounded-[3rem] w-full max-w-md overflow-hidden shadow-2xl">
-              <div className="p-10 border-b border-slate-50 flex justify-between items-center bg-indigo-50/30">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm text-indigo-600">
-                    <Store className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-black text-slate-800">New Supplier</h3>
-                    <p className="text-[10px] text-indigo-500 font-black uppercase tracking-[0.15em] mt-1">Vendor Management</p>
-                  </div>
-                </div>
-                <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-white rounded-full transition-all">
-                  <X className="w-6 h-6 text-slate-400" />
-                </button>
-              </div>
-              <form onSubmit={handleCreateSupplier} className="p-10 space-y-6">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Company Name</label>
-                  <div className="relative">
-                    <Store className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
-                    <input 
-                      required 
-                      value={formData.name} 
-                      onChange={e => setFormData({...formData, name: e.target.value})} 
-                      type="text" 
-                      className="w-full pl-11 pr-4 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-500 focus:bg-white transition-all font-bold" 
-                      placeholder="e.g. Al-Noor Textiles" 
-                    />
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Contact Phone</label>
-                  <div className="relative">
-                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
-                    <input 
-                      required 
-                      value={formData.phone} 
-                      onChange={e => setFormData({...formData, phone: e.target.value})} 
-                      type="tel" 
-                      className="w-full pl-11 pr-4 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-500 focus:bg-white transition-all font-bold" 
-                      placeholder="03xx-xxxxxxx" 
-                    />
-                  </div>
-                </div>
-                
-                <div className="pt-4">
-                  <button type="submit" className="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95 uppercase tracking-widest text-sm">
-                    Register Supplier
-                  </button>
-                  <button type="button" onClick={() => setIsModalOpen(false)} className="w-full mt-4 py-2 font-black text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-widest text-[10px]">
-                    Dismiss
-                  </button>
-                </div>
-              </form>
-            </motion.div>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="New Supplier"
+        subtitle="Vendor Management"
+        icon={<Store className="w-6 h-6" />}
+        maxWidth="max-w-md"
+      >
+        <form onSubmit={handleCreateSupplier} className="p-10 space-y-6">
+          <div className="space-y-1">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Company Name</label>
+            <div className="relative">
+              <Store className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
+              <input 
+                required 
+                value={formData.name} 
+                onChange={e => setFormData({...formData, name: e.target.value})} 
+                type="text" 
+                className="w-full pl-11 pr-4 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-500 focus:bg-white transition-all font-bold" 
+                placeholder="e.g. Al-Noor Textiles" 
+              />
+            </div>
           </div>
-        )}
-      </AnimatePresence>
+          <div className="space-y-1">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Contact Phone</label>
+            <div className="relative">
+              <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
+              <input 
+                required 
+                value={formData.phone} 
+                onChange={e => setFormData({...formData, phone: e.target.value})} 
+                type="tel" 
+                className="w-full pl-11 pr-4 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-500 focus:bg-white transition-all font-bold" 
+                placeholder="03xx-xxxxxxx" 
+              />
+            </div>
+          </div>
+          
+          <div className="pt-4">
+            <button type="submit" className="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95 uppercase tracking-widest text-sm">
+              Register Supplier
+            </button>
+            <button type="button" onClick={() => setIsModalOpen(false)} className="w-full mt-4 py-2 font-black text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-widest text-[10px]">
+              Dismiss
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };
