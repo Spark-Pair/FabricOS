@@ -4,7 +4,7 @@ import { useTenant } from '../../contexts/TenantContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { db } from '../../lib/db';
 import { motion } from 'framer-motion';
-import { TrendingUp, ShoppingBag, CreditCard, Wallet, Calendar, ArrowUpRight, ArrowDownRight, Package } from 'lucide-react';
+import { TrendingUp, ShoppingBag, CreditCard, Wallet, Calendar, ArrowUpRight, ArrowDownRight, Package, Receipt, Truck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Dashboard: React.FC = () => {
@@ -27,7 +27,9 @@ const Dashboard: React.FC = () => {
 
     const expenses = trans.filter(t => t.type === 'EXPENSE').reduce((sum, t) => sum + t.amount, 0);
 
-    return { totalSales, receivables, payables, expenses };
+    const recent = trans.slice(0, 5);
+
+    return { totalSales, receivables, payables, expenses, recent };
   }, [user, selectedBranch]);
 
   const cards = [
@@ -38,7 +40,7 @@ const Dashboard: React.FC = () => {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto space-y-12">
+    <div className="max-w-7xl mx-auto space-y-12 h-full overflow-y-auto pb-10 custom-scrollbar">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <h2 className="text-4xl font-black text-slate-800 tracking-tight leading-tight">Hello, {user?.ownerName.split(' ')[0]} 👋</h2>
@@ -80,26 +82,57 @@ const Dashboard: React.FC = () => {
         <div className="lg:col-span-2 bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm">
           <div className="flex items-center justify-between mb-10">
             <div>
-              <h3 className="text-2xl font-black text-slate-800">Recent Transactions</h3>
-              <p className="text-slate-400 text-sm font-medium mt-1">Real-time ledger entries for this branch.</p>
+              <h3 className="text-2xl font-black text-slate-800">Recent Activity</h3>
+              <p className="text-slate-400 text-sm font-medium mt-1">Latest ledger entries for this branch.</p>
             </div>
             <Link to="/sales" className="text-indigo-600 text-sm font-black hover:underline inline-flex items-center gap-2 group">
-              View Ledger <ArrowUpRight className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+              Full Ledger <ArrowUpRight className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
             </Link>
           </div>
           
-          <div className="py-24 text-center space-y-6">
-             <div className="w-24 h-24 bg-slate-50 rounded-[2rem] flex items-center justify-center mx-auto text-slate-200">
-                <Package className="w-12 h-12 opacity-50" />
-             </div>
-             <div className="max-w-xs mx-auto">
-               <p className="text-slate-500 font-bold text-lg leading-snug">No transactions yet.</p>
-               <p className="text-slate-400 text-sm mt-2">Start your day by recording your first sale or purchase.</p>
-               <div className="flex items-center justify-center gap-3 mt-8">
-                 <Link to="/sales" className="px-6 py-3 bg-indigo-600 text-white rounded-xl text-xs font-black shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all">New Sale</Link>
-                 <Link to="/purchases" className="px-6 py-3 bg-slate-100 text-slate-600 rounded-xl text-xs font-black hover:bg-slate-200 transition-all">New Purchase</Link>
-               </div>
-             </div>
+          <div className="space-y-4">
+            {metrics?.recent && metrics.recent.length > 0 ? (
+              metrics.recent.map((t, idx) => (
+                <div key={t.id} className="flex items-center justify-between p-5 hover:bg-slate-50 rounded-[2rem] border border-transparent hover:border-slate-100 transition-all group">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black ${
+                      t.type === 'SALE' ? 'bg-emerald-50 text-emerald-600' :
+                      t.type === 'PURCHASE' ? 'bg-indigo-50 text-indigo-600' : 'bg-rose-50 text-rose-600'
+                    }`}>
+                      {t.type === 'SALE' ? <Receipt className="w-5 h-5"/> : t.type === 'PURCHASE' ? <Truck className="w-5 h-5"/> : <Wallet className="w-5 h-5"/>}
+                    </div>
+                    <div>
+                      <div className="font-black text-slate-800">{t.entityName}</div>
+                      <div className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-0.5">
+                        {t.type} • {new Date(t.date).toLocaleDateString()}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className={`text-lg font-black tracking-tight ${t.type === 'SALE' ? 'text-emerald-600' : 'text-slate-900'}`}>
+                      {t.type === 'SALE' ? '+' : '-'}${t.amount.toLocaleString()}
+                    </div>
+                    <div className="text-[9px] text-slate-400 font-black uppercase tracking-widest">
+                      {t.amount === t.paidAmount ? 'Cleared' : `Due: $${t.amount - t.paidAmount}`}
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="py-24 text-center space-y-6">
+                <div className="w-24 h-24 bg-slate-50 rounded-[2rem] flex items-center justify-center mx-auto text-slate-200">
+                    <Package className="w-12 h-12 opacity-50" />
+                </div>
+                <div className="max-w-xs mx-auto">
+                  <p className="text-slate-500 font-bold text-lg leading-snug">No transactions yet.</p>
+                  <p className="text-slate-400 text-sm mt-2">Start your day by recording your first sale or purchase.</p>
+                  <div className="flex items-center justify-center gap-3 mt-8">
+                    <Link to="/sales" className="px-6 py-3 bg-indigo-600 text-white rounded-xl text-xs font-black shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all">New Sale</Link>
+                    <Link to="/purchases" className="px-6 py-3 bg-slate-100 text-slate-600 rounded-xl text-xs font-black hover:bg-slate-200 transition-all">New Purchase</Link>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -128,11 +161,11 @@ const Dashboard: React.FC = () => {
              <div className="space-y-4">
                 <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
                    <div className="text-xs font-bold text-slate-600">Active Articles</div>
-                   <div className="text-sm font-black text-slate-900">{db.articles.getByTenant(user.id).length}</div>
+                   <div className="text-sm font-black text-slate-900">{db.articles.getByTenant(user?.id || '').length}</div>
                 </div>
                 <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
                    <div className="text-xs font-bold text-slate-600">Total Branches</div>
-                   <div className="text-sm font-black text-slate-900">{db.branches.getByTenant(user.id).length}</div>
+                   <div className="text-sm font-black text-slate-900">{db.branches.getByTenant(user?.id || '').length}</div>
                 </div>
              </div>
           </div>
