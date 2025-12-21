@@ -16,7 +16,7 @@ const MainLayout: React.FC = () => {
   if (!user) return <Navigate to="/login" replace />;
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex h-screen bg-slate-50">
       {/* Desktop Sidebar */}
       <div className="hidden lg:block w-72 flex-shrink-0">
         <Sidebar />

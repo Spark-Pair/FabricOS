@@ -6,19 +6,19 @@ import { db } from '../../lib/db';
 import { PermissionButton } from '../../components/PermissionButton';
 import { Combobox } from '../../components/Combobox';
 import { Modal } from '../../components/Modal';
-import { 
-  Plus, 
-  Truck, 
-  User, 
-  DollarSign, 
-  Package, 
-  Ruler, 
-  Filter, 
-  CheckCircle2, 
-  Clock, 
-  Hash, 
-  EllipsisVertical, 
-  Trash2, 
+import {
+  Plus,
+  Truck,
+  User,
+  DollarSign,
+  Package,
+  Ruler,
+  Filter,
+  CheckCircle2,
+  Clock,
+  Hash,
+  EllipsisVertical,
+  Trash2,
   ShoppingBag,
   PlusCircle
 } from 'lucide-react';
@@ -37,7 +37,7 @@ const Purchases: React.FC = () => {
   // Invoice State
   const [supplierId, setSupplierId] = useState('');
   const [invoiceItems, setInvoiceItems] = useState<TransactionItem[]>([]);
-  
+
   // Current Item Entry State
   const [currentItem, setCurrentItem] = useState({
     articleId: '',
@@ -60,10 +60,10 @@ const Purchases: React.FC = () => {
   const handleAddItem = () => {
     const selectedArt = articles.find(a => a.id === currentItem.articleId);
     if (!selectedArt) return toast.error("Select a fabric article first.");
-    
+
     const qty = parseFloat(currentItem.quantity);
     const prc = parseFloat(currentItem.price);
-    
+
     if (isNaN(qty) || qty <= 0) return toast.error("Enter a valid quantity.");
     if (isNaN(prc) || prc <= 0) return toast.error("Enter a valid price.");
 
@@ -110,12 +110,12 @@ const Purchases: React.FC = () => {
     db.transactions.save(purchase as any);
     setPurchases([purchase, ...purchases]);
     setIsModalOpen(false);
-    
+
     // Reset form
     setSupplierId('');
     setInvoiceItems([]);
     setCurrentItem({ articleId: '', quantity: '', price: '' });
-    
+
     toast.success('Procurement invoice saved successfully!');
   };
 
@@ -133,8 +133,8 @@ const Purchases: React.FC = () => {
 
   return (
     <>
-      <Modal 
-        isOpen={isModalOpen} 
+      <Modal
+        isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title="Procurement Invoice"
         subtitle="Multi-item Stock Entry"
@@ -144,7 +144,7 @@ const Purchases: React.FC = () => {
         <div className="p-8 space-y-8">
           {/* Supplier Section */}
           <section className="space-y-4">
-            <Combobox 
+            <Combobox
               label="Supplier"
               placeholder="Search supplier name..."
               options={supplierOptions}
@@ -176,7 +176,7 @@ const Purchases: React.FC = () => {
                         <div className="text-right">
                           <p className="font-black text-slate-900 text-sm">${(item.quantity * item.price).toLocaleString()}</p>
                         </div>
-                        <button 
+                        <button
                           onClick={() => removeItem(idx)}
                           className="p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
                         >
@@ -200,44 +200,44 @@ const Purchases: React.FC = () => {
               <PlusCircle className="w-4 h-4 text-indigo-500" />
               <h5 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Add Next Fabric</h5>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <Combobox 
+              <Combobox
                 placeholder="Select fabric..."
                 options={articleOptions}
                 value={currentItem.articleId}
-                onChange={(id) => setCurrentItem({...currentItem, articleId: id})}
+                onChange={(id) => setCurrentItem({ ...currentItem, articleId: id })}
                 icon={<Package className="w-4 h-4" />}
                 className="md:col-span-2"
               />
               <div className="space-y-1">
                 <div className="relative">
                   <Ruler className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
-                  <input 
-                    value={currentItem.quantity} 
-                    onChange={e => setCurrentItem({...currentItem, quantity: e.target.value})} 
-                    type="number" 
-                    step="0.01" 
-                    className="w-full pl-11 pr-4 py-4 bg-white border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-500 transition-all font-bold" 
-                    placeholder="Quantity" 
+                  <input
+                    value={currentItem.quantity}
+                    onChange={e => setCurrentItem({ ...currentItem, quantity: e.target.value })}
+                    type="number"
+                    step="0.01"
+                    className="w-full pl-11 pr-4 py-4 bg-white border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-500 transition-all font-bold"
+                    placeholder="Quantity"
                   />
                 </div>
               </div>
               <div className="space-y-1">
                 <div className="relative">
                   <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
-                  <input 
-                    value={currentItem.price} 
-                    onChange={e => setCurrentItem({...currentItem, price: e.target.value})} 
-                    type="number" 
-                    className="w-full pl-11 pr-4 py-4 bg-white border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-500 transition-all font-bold" 
-                    placeholder="Price per unit" 
+                  <input
+                    value={currentItem.price}
+                    onChange={e => setCurrentItem({ ...currentItem, price: e.target.value })}
+                    type="number"
+                    className="w-full pl-11 pr-4 py-4 bg-white border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-500 transition-all font-bold"
+                    placeholder="Price per unit"
                   />
                 </div>
               </div>
             </div>
-            
-            <button 
+
+            <button
               type="button"
               onClick={handleAddItem}
               className="w-full py-4 bg-white border-2 border-indigo-100 text-indigo-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all shadow-sm"
@@ -248,14 +248,14 @@ const Purchases: React.FC = () => {
 
           {/* Action Buttons */}
           <div className="flex gap-4 pt-4">
-            <button 
-              type="button" 
-              onClick={() => setIsModalOpen(false)} 
+            <button
+              type="button"
+              onClick={() => setIsModalOpen(false)}
               className="flex-1 py-4 font-black text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-widest text-xs"
             >
               Discard
             </button>
-            <PermissionButton 
+            <PermissionButton
               onClick={handleCreatePurchase}
               className="flex-1 py-5 shadow-2xl shadow-indigo-100 font-black uppercase tracking-widest text-xs"
             >
@@ -281,7 +281,7 @@ const Purchases: React.FC = () => {
         </header>
 
         <div className="bg-white rounded-3xl border border-slate-200 h-full shadow-sm overflow-hidden">
-          <div className="overflow-x-auto overflow-y-scrool h-full">
+          <div className="overflow-x-auto overflow-y-scrool h-full flex flex-col">
             <table className="w-full text-left">
               <thead className="sticky top-0">
                 <tr className="bg-slate-100 text-slate-500 font-black text-[10px] uppercase tracking-[0.2em] border-b border-slate-200">
@@ -293,19 +293,7 @@ const Purchases: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {purchases.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="px-10 py-32 text-center">
-                      <div className="space-y-4">
-                        <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto text-slate-200">
-                          <Truck className="w-10 h-10" />
-                        </div>
-                        <p className="text-slate-400 font-black italic text-lg">No procurement records found.</p>
-                        <button onClick={() => setIsModalOpen(true)} className="text-indigo-600 font-black hover:underline text-sm uppercase tracking-widest">Restock your inventory</button>
-                      </div>
-                    </td>
-                  </tr>
-                ) : purchases.map((p) => {
+                {purchases.map((p) => {
                   const balance = p.amount - p.paidAmount;
                   const isPaid = balance <= 0;
                   return (
@@ -360,6 +348,17 @@ const Purchases: React.FC = () => {
                 })}
               </tbody>
             </table>
+            {purchases.length === 0 && (
+              <div className="text-center grow grid items-center">
+                <div className="space-y-4">
+                  <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto text-slate-200">
+                    <Truck className="w-10 h-10" />
+                  </div>
+                  <p className="text-slate-400 font-black italic text-lg">No procurement records found.</p>
+                  <button onClick={() => setIsModalOpen(true)} className="text-indigo-600 font-black hover:underline text-sm uppercase tracking-widest">Restock your inventory</button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
