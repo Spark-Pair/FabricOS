@@ -3,6 +3,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTenant } from '../contexts/TenantContext';
+import { Combobox } from './Combobox';
 import { UserRole } from '../types';
 import { 
   LayoutDashboard, 
@@ -16,10 +17,16 @@ import {
   LogOut,
   Settings,
   BarChart3,
-  Package
+  Package,
+  MapPin,
+  X
 } from 'lucide-react';
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  onClose?: () => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
   const { user, logout } = useAuth();
   const { branches, selectedBranch, selectBranch } = useTenant();
 
@@ -44,50 +51,62 @@ const Sidebar: React.FC = () => {
 
   const links = user?.role === UserRole.ADMIN ? adminLinks : userLinks;
 
+  const branchOptions = branches.map(b => ({
+    id: b.id,
+    label: b.name,
+    sublabel: b.isDefault ? 'Main Office' : 'Branch Store'
+  }));
+
   return (
-    <div className="w-64 h-screen bg-white border-r flex flex-col fixed left-0 top-0">
-      <div className="p-8">
-        <h1 className="text-3xl font-black text-indigo-600 tracking-tighter">FabricFlow</h1>
-        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1">
-          {user?.shopName || 'Admin Panel'}
-        </p>
+    <div className="h-full bg-white border-r border-slate-100 flex flex-col w-full">
+      <div className="p-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-black text-indigo-600 tracking-tighter">FabricFlow</h1>
+          <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1">
+            {user?.shopName || 'Admin Panel'}
+          </p>
+        </div>
+        {onClose && (
+          <button onClick={onClose} className="p-2 bg-slate-50 text-slate-400 rounded-lg lg:hidden">
+            <X className="w-5 h-5" />
+          </button>
+        )}
       </div>
 
       {user?.role === UserRole.USER && (
         <div className="px-6 mb-6">
-          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-2 block">Active Branch</label>
-          <select
+          <Combobox 
+            label="Active Branch"
+            placeholder="Switch branch..."
+            options={branchOptions}
             value={selectedBranch?.id || ''}
-            onChange={(e) => {
-              const b = branches.find(br => br.id === e.target.value);
+            onChange={(id) => {
+              const b = branches.find(br => br.id === id);
               if (b) selectBranch(b);
+              if (onClose) onClose();
             }}
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold focus:ring-2 focus:ring-indigo-500 outline-none appearance-none cursor-pointer"
-          >
-            {branches.map(branch => (
-              <option key={branch.id} value={branch.id}>{branch.name}</option>
-            ))}
-          </select>
+            icon={<MapPin className="w-4 h-4" />}
+          />
         </div>
       )}
 
-      <nav className="flex-1 px-4 overflow-y-auto space-y-1">
+      <nav className="flex-1 px-4 overflow-y-auto space-y-1 custom-scrollbar pb-8">
         {links.map((link) => (
           <NavLink
             key={link.to}
             to={link.to}
+            onClick={onClose}
             className={({ isActive }) => 
               `flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-bold transition-all ${
                 isActive 
-                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' 
-                  : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100/50' 
+                  : 'text-slate-500 hover:bg-slate-50 hover:text-indigo-600'
               }`
             }
           >
-            {/* Wrap children in a function to correctly access the isActive property from NavLink */}
             {({ isActive }) => (
               <>
-                <link.icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                <link.icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-indigo-600'}`} />
                 {link.label}
               </>
             )}
@@ -95,10 +114,10 @@ const Sidebar: React.FC = () => {
         ))}
       </nav>
 
-      <div className="p-6 border-t mt-auto">
+      <div className="p-6 border-t border-slate-50 mt-auto">
         <button
           onClick={logout}
-          className="flex items-center gap-3 w-full px-4 py-3.5 text-slate-400 hover:bg-red-50 hover:text-red-600 rounded-2xl text-sm font-bold transition-all"
+          className="flex items-center gap-3 w-full px-4 py-3.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 rounded-2xl text-sm font-bold transition-all"
         >
           <LogOut className="w-5 h-5" />
           Logout
