@@ -55,7 +55,7 @@ const MainLayout: React.FC = () => {
           <Menu className="w-6 h-6" />
         </button>
 
-        <main className="flex-1 p-6 md:p-10 lg:p-12">
+        <main className="p-6 md:pb-5 h-screen overflow-hidden">
           {subscriptionStatus === 'EXPIRED' && (
             <motion.div 
               initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
