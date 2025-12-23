@@ -26,6 +26,7 @@ const Expenses: React.FC = () => {
     e.preventDefault();
     if (!user || !selectedBranch) return;
 
+    // Added createdAt property to satisfy the Transaction interface requirements
     const expense = {
       id: 'e_' + Date.now(),
       tenantId: user.id,
@@ -36,9 +37,10 @@ const Expenses: React.FC = () => {
       amount: parseFloat(formData.amount),
       paidAmount: parseFloat(formData.amount),
       date: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
     };
 
-    db.transactions.save(expense);
+    db.transactions.save(expense as any);
     setExpenses([expense, ...expenses]);
     setIsModalOpen(false);
     setFormData({ description: '', amount: '', category: 'Shop Rent' });

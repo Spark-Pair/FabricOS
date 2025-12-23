@@ -4,6 +4,29 @@ export enum UserRole {
   USER = 'USER'
 }
 
+export type StockStage = 'RAW' | 'PRINTED' | 'DYED' | 'EMBROIDERED' | 'FINISHED';
+export type PaymentMode = 'CASH' | 'ONLINE' | 'CHEQUE' | 'SLIP';
+export type PaymentStatus = 'PENDING' | 'CLEARED' | 'BOUNCED' | 'CANCELLED';
+
+export interface StockBatch {
+  id: string;
+  tenantId: string;
+  branchId: string;
+  articleId: string;
+  articleName: string;
+  stage: StockStage;
+  initialQuantity: number;
+  currentQuantity: number;
+  unit: string;
+  unitCost: number;
+  basePurchasePrice: number;
+  accumulatedWorkCost: number;
+  supplierId: string;
+  supplierName: string;
+  date: string;
+  parentId?: string;
+}
+
 export interface Branch {
   id: string;
   tenantId: string;
@@ -55,18 +78,17 @@ export interface Article {
   id: string;
   tenantId: string;
   name: string;
-  unit: string; // Meter, Yard, Piece, etc.
-  stock: number;
-  basePrice: number; // Original purchase price per unit
-  workCost?: number; // Accumulated processing work cost per unit
+  unit: string;
 }
 
 export interface TransactionItem {
   articleId: string;
   articleName: string;
+  batchId: string;
   quantity: number;
   unit: string;
   price: number;
+  unitCost: number;
 }
 
 export interface Transaction {
@@ -75,15 +97,25 @@ export interface Transaction {
   branchId: string;
   type: 'SALE' | 'PURCHASE' | 'EXPENSE' | 'WORK' | 'PAYMENT' | 'RECOVERY';
   category?: string;
-  entityId?: string; // ID of Customer or Supplier
+  entityId?: string;
   entityName: string; 
   amount: number;
   paidAmount: number;
   date: string;
   note?: string;
   items?: TransactionItem[];
-  workDescription?: string; // For WORK type
-  workPricePerUnit?: number; // For WORK type
+  workDescription?: string;
+  workPricePerUnit?: number;
+  sourceBatchId?: string;
+  targetBatchId?: string;
+  paymentMode?: PaymentMode;
+  paymentStatus?: PaymentStatus; 
+  isCleared?: boolean; 
+  referenceNo?: string;
+  bankName?: string;
+  clearedAt?: string;
+  clearanceNote?: string;
+  createdAt: string;
 }
 
 export interface TenantState {

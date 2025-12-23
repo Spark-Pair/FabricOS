@@ -16,20 +16,19 @@ const Reports: React.FC = () => {
     if (!user) return null;
     const transactions = db.transactions.getAllTenant(user.id);
     const articles = db.articles.getByTenant(user.id);
+    // Fix: Fetch batches to calculate inventory valuation accurately
+    const batches = db.batches.getByTenant(user.id);
 
     // Sales & Costing
     const sales = transactions.filter(t => t.type === 'SALE');
     const totalRevenue = sales.reduce((sum, t) => sum + t.amount, 0);
     
-    // Calculate Cost of Goods Sold (approximate based on current costing)
+    // Fix: Calculate Cost of Goods Sold (COGS) using the unitCost snapshot from TransactionItem
     let cogs = 0;
     sales.forEach(sale => {
       sale.items?.forEach(item => {
-        const art = articles.find(a => a.id === item.articleId);
-        if (art) {
-          const unitCost = art.basePrice + (art.workCost || 0);
-          cogs += item.quantity * unitCost;
-        }
+        // unitCost is a snapshot of the batch cost at the time of sale
+        cogs += item.quantity * (item.unitCost || 0);
       });
     });
 
@@ -39,9 +38,9 @@ const Reports: React.FC = () => {
     const expenses = transactions.filter(t => t.type === 'EXPENSE').reduce((sum, t) => sum + t.amount, 0);
     const netProfit = grossProfit - expenses;
 
-    // Stock Valuation
-    const stockValuation = articles.reduce((sum, art) => {
-      return sum + (art.stock * (art.basePrice + (art.workCost || 0)));
+    // Fix: Stock Valuation using active batches and their calculated unit costs
+    const stockValuation = batches.reduce((sum, batch) => {
+      return sum + (batch.currentQuantity * batch.unitCost);
     }, 0);
 
     // Activity
@@ -150,11 +149,11 @@ const Reports: React.FC = () => {
           <div className="grid grid-cols-2 gap-4">
              <div className="p-6 bg-white border border-slate-100 rounded-2xl">
                 <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Items in Catalog</div>
-                <div className="text-2xl font-black text-slate-800">{db.articles.getByTenant(user.id).length}</div>
+                <div className="text-2xl font-black text-slate-800">{db.articles.getByTenant(user?.id || '').length}</div>
              </div>
              <div className="p-6 bg-white border border-slate-100 rounded-2xl">
                 <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Wholesale Partners</div>
-                <div className="text-2xl font-black text-slate-800">{db.suppliers.getByTenant(user.id).length}</div>
+                <div className="text-2xl font-black text-slate-800">{db.suppliers.getByTenant(user?.id || '').length}</div>
              </div>
           </div>
         </section>

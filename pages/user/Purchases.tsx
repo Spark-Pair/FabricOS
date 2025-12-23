@@ -46,12 +46,16 @@ const Purchases: React.FC = () => {
     const prc = parseFloat(currentItem.price);
     if (isNaN(qty) || qty <= 0 || isNaN(prc) || prc <= 0) return toast.error("Invalid input.");
 
+    // Fix: Added missing batchId and unitCost to satisfy TransactionItem interface requirements
+    // For a purchase, unitCost is the purchase price and batchId is assigned when saved to DB
     setInvoiceItems([...invoiceItems, {
       articleId: selectedArt.id,
       articleName: selectedArt.name,
+      batchId: '', // Populated by db.transactions.save during purchase processing
       quantity: qty,
       unit: selectedArt.unit,
-      price: prc
+      price: prc,
+      unitCost: prc
     }]);
     setCurrentItem({ articleId: '', quantity: '', price: '' });
   };
