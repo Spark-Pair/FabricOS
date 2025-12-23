@@ -8,12 +8,16 @@ import Login from './pages/auth/Login';
 import Users from './pages/admin/Users';
 import Sales from './pages/user/Sales';
 import Purchases from './pages/user/Purchases';
+import WorkProcessing from './pages/user/WorkProcessing';
 import Expenses from './pages/user/Expenses';
 import Customers from './pages/user/Customers';
 import Suppliers from './pages/user/Suppliers';
 import Branches from './pages/user/Branches';
 import Articles from './pages/user/Articles';
 import Dashboard from './pages/user/Dashboard';
+import Payables from './pages/user/Payables';
+import Receivables from './pages/user/Receivables';
+import Reports from './pages/user/Reports';
 
 const PlaceholderPage = ({ title }: { title: string }) => (
   <div className="flex flex-col items-center justify-center h-96 bg-white border-2 border-dashed border-slate-200 rounded-[2.5rem] p-12 text-center">
@@ -42,12 +46,13 @@ const App: React.FC = () => {
             <Route path="/articles" element={<Articles />} />
             <Route path="/sales" element={<Sales />} />
             <Route path="/purchases" element={<Purchases />} />
+            <Route path="/work-processing" element={<WorkProcessing />} />
             <Route path="/expenses" element={<Expenses />} />
-            <Route path="/payables" element={<PlaceholderPage title="Payables" />} />
-            <Route path="/receivables" element={<PlaceholderPage title="Receivables" />} />
+            <Route path="/payables" element={<Payables />} />
+            <Route path="/receivables" element={<Receivables />} />
             <Route path="/suppliers" element={<Suppliers />} />
             <Route path="/customers" element={<Customers />} />
-            <Route path="/reports" element={<PlaceholderPage title="Reports" />} />
+            <Route path="/reports" element={<Reports />} />
             <Route path="/branches" element={<Branches />} />
             
             <Route path="/" element={<Navigate to="/login" replace />} />

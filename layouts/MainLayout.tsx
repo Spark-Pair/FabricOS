@@ -12,7 +12,7 @@ const MainLayout: React.FC = () => {
   const { subscriptionStatus } = useTenant();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  if (isLoading) return <div className="h-screen flex items-center justify-center font-black text-indigo-600 animate-pulse">Loading FabricFlow...</div>;
+  if (isLoading) return <div className="h-screen flex items-center justify-center font-black text-indigo-600 animate-pulse">Loading FabricOS...</div>;
   if (!user) return <Navigate to="/login" replace />;
 
   return (

@@ -57,7 +57,8 @@ export interface Article {
   name: string;
   unit: string; // Meter, Yard, Piece, etc.
   stock: number;
-  basePrice: number;
+  basePrice: number; // Original purchase price per unit
+  workCost?: number; // Accumulated processing work cost per unit
 }
 
 export interface TransactionItem {
@@ -72,7 +73,7 @@ export interface Transaction {
   id: string;
   tenantId: string;
   branchId: string;
-  type: 'SALE' | 'PURCHASE' | 'EXPENSE';
+  type: 'SALE' | 'PURCHASE' | 'EXPENSE' | 'WORK' | 'PAYMENT' | 'RECOVERY';
   category?: string;
   entityId?: string; // ID of Customer or Supplier
   entityName: string; 
@@ -81,6 +82,8 @@ export interface Transaction {
   date: string;
   note?: string;
   items?: TransactionItem[];
+  workDescription?: string; // For WORK type
+  workPricePerUnit?: number; // For WORK type
 }
 
 export interface TenantState {

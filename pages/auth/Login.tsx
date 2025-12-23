@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { UserRole } from '../../types';
 import { db } from '../../lib/db';
 import toast from 'react-hot-toast';
-import { Lock, User, CheckCircle2 } from 'lucide-react';
+import { Lock, User, CheckCircle2, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const Login: React.FC = () => {
@@ -36,9 +36,16 @@ const Login: React.FC = () => {
         {/* Left: Branding & Info */}
         <div className="bg-indigo-600 p-12 lg:p-20 text-white flex flex-col justify-between relative overflow-hidden">
           <div className="relative z-10">
-            <h1 className="text-6xl font-black tracking-tighter mb-4">FabricFlow</h1>
-            <p className="text-xl text-indigo-100 font-medium max-w-xs leading-relaxed opacity-90">
-              The smart OS for modern textile businesses.
+            <div className="flex items-center gap-3 mb-2">
+              <h1 className="text-6xl font-black tracking-tighter">FabricOS</h1>
+              <div className="w-4 h-4 rounded-full bg-white animate-ping mt-4" />
+            </div>
+            <div className="flex items-center gap-2 text-indigo-100 mb-4 opacity-90">
+              <Sparkles className="w-5 h-5 text-amber-300" />
+              <p className="text-xl font-medium tracking-tight">Powered by SparkPair</p>
+            </div>
+            <p className="text-lg text-indigo-100 font-medium max-w-xs leading-relaxed opacity-70">
+              The high-performance textile operating system for modern retail empires.
             </p>
           </div>
           
@@ -47,13 +54,13 @@ const Login: React.FC = () => {
               <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
                 <CheckCircle2 className="w-6 h-6 text-indigo-300" />
               </div>
-              <p className="text-sm font-bold tracking-wide">Multi-Branch Synchronization</p>
+              <p className="text-sm font-bold tracking-wide">Enterprise Multi-Branch Sync</p>
             </div>
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
                 <CheckCircle2 className="w-6 h-6 text-indigo-300" />
               </div>
-              <p className="text-sm font-bold tracking-wide">Automated Stock Tracking</p>
+              <p className="text-sm font-bold tracking-wide">Real-time Margin Protection</p>
             </div>
           </div>
           
@@ -66,7 +73,7 @@ const Login: React.FC = () => {
         <div className="p-12 lg:p-20 flex flex-col justify-center">
           <header className="mb-12">
             <h2 className="text-3xl font-black text-slate-800 mb-2">Sign In</h2>
-            <p className="text-slate-400 font-bold uppercase text-[10px] tracking-[0.2em]">Enter your secure access credentials</p>
+            <p className="text-slate-400 font-bold uppercase text-[10px] tracking-[0.2em]">Secure Access Terminal — FabricOS v2.0</p>
           </header>
           
           <form onSubmit={handleLogin} className="space-y-6">
@@ -106,11 +113,11 @@ const Login: React.FC = () => {
               type="submit" 
               className="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black hover:bg-indigo-700 active:scale-95 transition-all shadow-xl shadow-indigo-100 mt-4"
             >
-              Access FabricFlow
+              Enter Workspace
             </button>
             
             <div className="mt-12 p-6 bg-slate-50 rounded-[2rem] border border-slate-100">
-              <p className="text-[10px] text-slate-400 uppercase tracking-widest font-black text-center mb-4">Quick Demo Login</p>
+              <p className="text-[10px] text-slate-400 uppercase tracking-widest font-black text-center mb-4">Internal Access Credentials</p>
               <div className="flex flex-col gap-2">
                 <button 
                   type="button" 
@@ -129,6 +136,11 @@ const Login: React.FC = () => {
               </div>
             </div>
           </form>
+          <div className="mt-auto pt-10 text-center">
+            <p className="text-[9px] text-slate-300 font-black uppercase tracking-widest">
+              FabricOS Enterprise Edition — &copy; 2025 SparkPair Inc.
+            </p>
+          </div>
         </div>
       </div>
     </div>

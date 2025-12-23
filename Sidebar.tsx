@@ -23,8 +23,7 @@ import {
   ChevronUp,
   User as UserIcon,
   ShieldCheck,
-  PenTool,
-  Sparkles
+  PenTool
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -32,6 +31,7 @@ interface SidebarProps {
   onClose?: () => void;
 }
 
+// Fixed props destructuring and type definition to ensure onClose is in scope
 const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
   const { user, logout } = useAuth();
   const { branches, selectedBranch, selectBranch } = useTenant();
@@ -80,16 +80,10 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
     <div className="h-full bg-white border-r border-slate-100 flex flex-col w-full overflow-hidden">
       <div className="p-8 flex items-center justify-between shrink-0">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-black text-indigo-600 tracking-tighter">FabricOS</h1>
-            <div className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse" />
-          </div>
-          <div className="flex items-center gap-1.5 mt-1">
-            <Sparkles className="w-2.5 h-2.5 text-amber-500 fill-amber-500" />
-            <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest">
-              By SparkPair
-            </p>
-          </div>
+          <h1 className="text-2xl font-black text-indigo-600 tracking-tighter">FabricFlow</h1>
+          <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1">
+            {user?.shopName || 'Admin Panel'}
+          </p>
         </div>
         {onClose && (
           <button onClick={onClose} className="p-2 bg-slate-50 text-slate-400 rounded-lg lg:hidden">
