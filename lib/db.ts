@@ -21,11 +21,11 @@ const initDB = () => {
   };
 
   const aqeelId = 'u_aqeel';
-  const branchId = 'b_aqeel_1';
+  const branch1Id = 'b_aqeel_1';
 
   const aqeel: UserProfile = {
     id: aqeelId, username: 'aqeel', password: '1234',
-    shopName: 'Elite Fabrics Karachi', ownerName: 'Aqeel Ahmad', phoneNumber: '0300-1234567',
+    shopName: 'Elite Fabrics & Textiles', ownerName: 'Aqeel Ahmad', phoneNumber: '0300-1234567',
     role: UserRole.USER, isActive: true, registrationDate: new Date().toISOString(),
     currentSubscription: {
       id: 'sub_aqeel', startDate: new Date().toISOString(), 
@@ -37,65 +37,35 @@ const initDB = () => {
   localStorage.setItem(KEYS.USERS, JSON.stringify([admin, aqeel]));
   
   localStorage.setItem(KEYS.BRANCHES, JSON.stringify([
-    { id: branchId, tenantId: aqeelId, name: 'Main Outlet', isDefault: true, address: 'Textile Market, Karachi' },
-    { id: 'b_aqeel_2', tenantId: aqeelId, name: 'Tariq Road Branch', isDefault: false, address: 'Tariq Road, Karachi' }
+    { id: branch1Id, tenantId: aqeelId, name: 'Karachi Main Outlet', isDefault: true, address: 'Zama-Zama Market, Karachi' }
   ]));
 
-  localStorage.setItem(KEYS.ARTICLES, JSON.stringify([
+  const articles: Article[] = [
     { id: 'art_1', tenantId: aqeelId, name: 'Premium Raw Silk', unit: 'meter' },
-    { id: 'art_2', tenantId: aqeelId, name: 'Cotton Lawn (90/70)', unit: 'meter' },
-    { id: 'art_3', tenantId: aqeelId, name: 'Digital Print Satin', unit: 'yard' }
-  ]));
+    { id: 'art_2', tenantId: aqeelId, name: 'Cotton Lawn (90/70)', unit: 'meter' }
+  ];
+  localStorage.setItem(KEYS.ARTICLES, JSON.stringify(articles));
 
   localStorage.setItem(KEYS.SUPPLIERS, JSON.stringify([
-    { id: 's1', tenantId: aqeelId, name: 'Pak Silk Mills', phone: '021-3334445', balance: 125000 },
-    { id: 's2', tenantId: aqeelId, name: 'Gul Ahmed Wholesale', phone: '021-9998887', balance: 45000 },
-    { id: 's3', tenantId: aqeelId, name: 'Nishat Emporium', phone: '042-7776665', balance: 0 }
+    { id: 's1', tenantId: aqeelId, name: 'Indus Weaving Co.', phone: '021-3334445', balance: 0 },
+    { id: 's2', tenantId: aqeelId, name: 'Master Printers', phone: '021-9998887', balance: 0 }
   ]));
 
   localStorage.setItem(KEYS.CUSTOMERS, JSON.stringify([
-    { id: 'c1', tenantId: aqeelId, name: 'Sara Boutique', phone: '0321-1234567', balance: 85000 },
-    { id: 'c2', tenantId: aqeelId, name: 'Hassan Retailers', phone: '0333-8889990', balance: 12000 },
-    { id: 'c3', tenantId: aqeelId, name: 'Walk-in Client', phone: '0300-0000000', balance: 0 }
+    { id: 'c1', tenantId: aqeelId, name: 'Zara Boutique', phone: '0321-1234567', balance: 0 }
   ]));
 
-  localStorage.setItem(KEYS.BATCHES, JSON.stringify([]));
-
-  // Seed some initial payment/recovery history
-  const demoTransactions: Transaction[] = [
+  // Seed initial batches
+  const initialBatches: StockBatch[] = [
     {
-      id: 'pay_demo_1',
-      tenantId: aqeelId,
-      branchId: branchId,
-      type: 'PAYMENT',
-      entityId: 's1',
-      entityName: 'Pak Silk Mills',
-      amount: 25000,
-      paidAmount: 25000,
-      date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-      paymentMode: 'CHEQUE',
-      referenceNo: 'CHQ-990011',
-      isCleared: true,
-      clearedAt: new Date().toISOString(),
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: 'rec_demo_1',
-      tenantId: aqeelId,
-      branchId: branchId,
-      type: 'RECOVERY',
-      entityId: 'c1',
-      entityName: 'Sara Boutique',
-      amount: 15000,
-      paidAmount: 15000,
-      date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-      paymentMode: 'CASH',
-      referenceNo: 'CSH-001',
-      isCleared: true,
-      createdAt: new Date().toISOString()
+      id: 'b_seed_1', tenantId: aqeelId, branchId: branch1Id, articleId: 'art_1', articleName: 'Premium Raw Silk',
+      stage: 'RAW', initialQuantity: 1000, currentQuantity: 1000, unit: 'meter',
+      unitCost: 10, basePurchasePrice: 10, accumulatedWorkCost: 0,
+      supplierId: 's1', supplierName: 'Indus Weaving Co.', date: new Date().toISOString()
     }
   ];
-  localStorage.setItem(KEYS.TRANSACTIONS, JSON.stringify(demoTransactions));
+  localStorage.setItem(KEYS.BATCHES, JSON.stringify(initialBatches));
+  localStorage.setItem(KEYS.TRANSACTIONS, JSON.stringify([]));
 };
 
 initDB();
@@ -124,20 +94,24 @@ export const db = {
   },
 
   batches: {
+    getAll: (): StockBatch[] => JSON.parse(localStorage.getItem(KEYS.BATCHES) || '[]'),
     getByTenant: (tenantId: string): StockBatch[] => 
-      JSON.parse(localStorage.getItem(KEYS.BATCHES) || '[]').filter((b: StockBatch) => b.tenantId === tenantId),
+      db.batches.getAll().filter((b: StockBatch) => b.tenantId === tenantId),
     save: (batch: StockBatch) => {
-      const all = JSON.parse(localStorage.getItem(KEYS.BATCHES) || '[]');
+      const all = db.batches.getAll();
       const idx = all.findIndex((b: any) => b.id === batch.id);
       if (idx > -1) all[idx] = batch; else all.push(batch);
       localStorage.setItem(KEYS.BATCHES, JSON.stringify(all));
     },
     updateQuantity: (batchId: string, delta: number) => {
-      const all = JSON.parse(localStorage.getItem(KEYS.BATCHES) || '[]');
+      const all = db.batches.getAll();
       const idx = all.findIndex((b: any) => b.id === batchId);
       if (idx > -1) {
+        if (all[idx].currentQuantity + delta < 0) throw new Error("Insufficient batch quantity!");
         all[idx].currentQuantity += delta;
         localStorage.setItem(KEYS.BATCHES, JSON.stringify(all));
+      } else {
+        throw new Error("Batch not found during quantity update.");
       }
     }
   },
@@ -151,10 +125,80 @@ export const db = {
     
     save: (t: Transaction) => {
       const all = JSON.parse(localStorage.getItem(KEYS.TRANSACTIONS) || '[]');
+      
+      // 1. Handle STOCK IN (Purchases)
+      if (t.type === 'PURCHASE' && t.items) {
+        t.items.forEach(item => {
+          const newBatch: StockBatch = {
+            id: 'batch_' + Math.random().toString(36).substr(2, 9),
+            tenantId: t.tenantId,
+            branchId: t.branchId,
+            articleId: item.articleId,
+            articleName: item.articleName,
+            stage: 'RAW', // Mandatory for purchases
+            initialQuantity: item.quantity,
+            currentQuantity: item.quantity,
+            unit: item.unit,
+            unitCost: item.price,
+            basePurchasePrice: item.price,
+            accumulatedWorkCost: 0,
+            supplierId: t.entityId || '',
+            supplierName: t.entityName,
+            date: t.date
+          };
+          db.batches.save(newBatch);
+          item.batchId = newBatch.id; // Map item to its new batch
+        });
+      }
+
+      // 2. Handle STOCK OUT (Sales)
+      if (t.type === 'SALE' && t.items) {
+        t.items.forEach(item => {
+          if (!item.batchId) throw new Error(`Sale item ${item.articleName} has no batch assigned.`);
+          // Reduce batch qty
+          db.batches.updateQuantity(item.batchId, -item.quantity);
+          // Snapshot cost from batch for accurate profit
+          const batch = db.batches.getAll().find(b => b.id === item.batchId);
+          if (batch) item.unitCost = batch.unitCost;
+        });
+      }
+
+      // 3. Handle STOCK TRANSFORMATION (Work Processing)
+      if (t.type === 'WORK' && t.sourceBatchId && t.items?.[0]) {
+        const item = t.items[0];
+        const sourceBatch = db.batches.getAll().find(b => b.id === t.sourceBatchId);
+        if (!sourceBatch) throw new Error("Source batch not found for transformation.");
+
+        // Reduce source qty
+        db.batches.updateQuantity(t.sourceBatchId, -item.quantity);
+
+        // Create new TARGET batch
+        const targetBatch: StockBatch = {
+          id: 'batch_trans_' + Date.now(),
+          tenantId: t.tenantId,
+          branchId: t.branchId,
+          articleId: sourceBatch.articleId,
+          articleName: sourceBatch.articleName,
+          stage: (t.category as StockStage) || 'PRINTED',
+          initialQuantity: item.quantity,
+          currentQuantity: item.quantity,
+          unit: sourceBatch.unit,
+          unitCost: sourceBatch.unitCost + (t.workPricePerUnit || 0), // Cost accumulation
+          basePurchasePrice: sourceBatch.basePurchasePrice,
+          accumulatedWorkCost: sourceBatch.accumulatedWorkCost + (t.workPricePerUnit || 0),
+          supplierId: t.entityId || '',
+          supplierName: t.entityName,
+          date: t.date,
+          parentId: sourceBatch.id
+        };
+        db.batches.save(targetBatch);
+        item.batchId = targetBatch.id;
+      }
+
       all.push(t);
       localStorage.setItem(KEYS.TRANSACTIONS, JSON.stringify(all));
 
-      // Balance Rule: Immediate Update
+      // 4. Handle BALANCES
       if (t.entityId) {
         if (t.type === 'SALE' || t.type === 'RECOVERY') {
           const cust = db.customers.getByTenant(t.tenantId).find(c => c.id === t.entityId);

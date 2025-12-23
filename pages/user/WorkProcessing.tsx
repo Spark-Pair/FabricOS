@@ -55,70 +55,75 @@ const WorkProcessing: React.FC = () => {
     const paid = parseFloat(formData.paidAmount);
 
     if (qty > selectedSourceBatch.currentQuantity) {
-      return toast.error(`Insufficient stock in selected batch! Max: ${selectedSourceBatch.currentQuantity}`);
+      return toast.error(`Insufficient quantity in source batch! Available: ${selectedSourceBatch.currentQuantity}`);
     }
 
-    const totalAmount = qty * prc;
+    try {
+      const totalAmount = qty * prc;
 
-    // Added createdAt property to satisfy the Transaction interface requirements
-    const workTransaction: Transaction = {
-      id: 'w_' + Date.now(),
-      tenantId: user.id,
-      branchId: selectedBranch.id,
-      type: 'WORK',
-      category: formData.stage,
-      entityId: formData.supplierId,
-      entityName: suppliers.find(s => s.id === formData.supplierId)?.name || '',
-      amount: totalAmount,
-      paidAmount: paid,
-      date: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
-      workDescription: formData.description,
-      workPricePerUnit: prc,
-      sourceBatchId: formData.sourceBatchId,
-      items: [{
-        articleId: selectedSourceBatch.articleId,
-        articleName: selectedSourceBatch.articleName,
-        batchId: '', // To be filled by target batch logic in db.ts
-        quantity: qty,
-        unit: selectedSourceBatch.unit,
-        price: prc,
-        unitCost: selectedSourceBatch.unitCost + prc
-      }]
-    };
+      const workTransaction: Transaction = {
+        id: 'w_' + Date.now(),
+        tenantId: user.id,
+        branchId: selectedBranch.id,
+        type: 'WORK',
+        category: formData.stage,
+        entityId: formData.supplierId,
+        entityName: suppliers.find(s => s.id === formData.supplierId)?.name || '',
+        amount: totalAmount,
+        paidAmount: paid,
+        date: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        workDescription: formData.description,
+        workPricePerUnit: prc,
+        sourceBatchId: formData.sourceBatchId,
+        items: [{
+          articleId: selectedSourceBatch.articleId,
+          articleName: selectedSourceBatch.articleName,
+          batchId: '', 
+          quantity: qty,
+          unit: selectedSourceBatch.unit,
+          price: prc,
+          unitCost: selectedSourceBatch.unitCost + prc
+        }]
+      };
 
-    db.transactions.save(workTransaction);
-    
-    // Refresh
-    setWorkEntries([workTransaction, ...workEntries]);
-    setBatches(db.batches.getByTenant(user.id).filter(b => b.currentQuantity > 0));
-    setIsModalOpen(false);
-    setFormData({ supplierId: '', sourceBatchId: '', stage: 'PRINTED', description: '', quantity: '', pricePerUnit: '', paidAmount: '0' });
-    toast.success('Stock Transformation Complete! New batch created.');
+      db.transactions.save(workTransaction);
+      
+      // Refresh
+      setWorkEntries([workTransaction, ...workEntries]);
+      setBatches(db.batches.getByTenant(user.id).filter(b => b.currentQuantity > 0));
+      setIsModalOpen(false);
+      setFormData({ supplierId: '', sourceBatchId: '', stage: 'PRINTED', description: '', quantity: '', pricePerUnit: '', paidAmount: '0' });
+      toast.success('Stock Transformed & New Batch Created!');
+    } catch (err: any) {
+      toast.error(err.message || "Failed to process transformation.");
+    }
   };
 
   const supplierOptions = suppliers.map(s => ({ id: s.id, label: s.name, sublabel: s.phone }));
-  const batchOptions = batches.map(b => ({ 
+  
+  // Rule: You can only transform RAW stock into other stages
+  const sourceBatchOptions = batches.filter(b => b.stage === 'RAW').map(b => ({ 
     id: b.id, 
-    label: `${b.articleName} (${b.stage})`, 
+    label: `${b.articleName} (ID: ${b.id.slice(-5)})`, 
     sublabel: `Cost: $${b.unitCost} | Avail: ${b.currentQuantity} ${b.unit}s` 
   }));
 
   const stageOptions = [
-    { id: 'PRINTED', label: 'Printing' },
-    { id: 'DYED', label: 'Dyeing' },
-    { id: 'EMBROIDERED', label: 'Embroidery' },
-    { id: 'FINISHED', label: 'Finishing' },
+    { id: 'PRINTED', label: 'Printing Service' },
+    { id: 'DYED', label: 'Dyeing / Coloring' },
+    { id: 'EMBROIDERED', label: 'Embroidery Work' },
+    { id: 'FINISHED', label: 'Final Finishing' },
   ];
 
   return (
     <div className="max-w-7xl mx-auto flex flex-col gap-6 relative overflow-hidden h-full pb-20 custom-scrollbar">
       <PageHeader 
         title="Stock Transformation" 
-        subtitle="Manage the conversion of RAW fabric into PROCESSED stock stages."
+        subtitle="Manage the conversion of RAW fabric into PROCESSED stock batches."
         actions={
           <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-3 px-8 py-4 bg-indigo-600 text-white font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-indigo-700 shadow-xl shadow-indigo-100 transition-all active:scale-95">
-            <Plus className="w-5 h-5" /> Start New Work
+            <Plus className="w-5 h-5" /> Transform RAW Stock
           </button>
         }
       />
@@ -130,8 +135,8 @@ const WorkProcessing: React.FC = () => {
               <tr className="text-slate-400 font-black text-[10px] uppercase tracking-[0.2em] border-b border-slate-50">
                 <th className="px-10 py-6">Vendor & Service</th>
                 <th className="px-10 py-6">Transformation</th>
-                <th className="px-10 py-6">Value Addition</th>
-                <th className="px-10 py-6">Processing Cost</th>
+                <th className="px-10 py-6">Added Cost</th>
+                <th className="px-10 py-6">Total Bill</th>
                 <th className="px-10 py-6 text-right">Date</th>
               </tr>
             </thead>
@@ -146,7 +151,7 @@ const WorkProcessing: React.FC = () => {
                       <div>
                         <div className="font-black text-slate-800 text-base">{w.entityName}</div>
                         <div className="text-[10px] text-indigo-500 font-black uppercase tracking-widest mt-0.5">
-                          {w.workDescription || 'Value Added Service'}
+                          {w.workDescription || 'Service'}
                         </div>
                       </div>
                     </div>
@@ -168,62 +173,56 @@ const WorkProcessing: React.FC = () => {
               ))}
             </tbody>
           </table>
-          {workEntries.length === 0 && <EmptyState icon={<Activity className="w-16 h-16" />} message="No stock transformation records yet" />}
+          {workEntries.length === 0 && <EmptyState icon={<Activity className="w-16 h-16" />} message="No transformations found" />}
         </div>
       </div>
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Record Stock Transformation" icon={<PenTool className="w-6 h-6" />} maxWidth="max-w-2xl" footer={
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="New Transformation Entry" icon={<PenTool className="w-6 h-6" />} maxWidth="max-w-2xl" footer={
         <div className="flex gap-4">
           <button onClick={() => setIsModalOpen(false)} className="flex-1 py-3 font-black text-slate-400 uppercase tracking-widest text-[10px]">Discard</button>
-          <PermissionButton onClick={handleCreateWork} className="flex-1 py-4 shadow-2xl shadow-indigo-100 font-black uppercase tracking-widest text-xs">Authorize Transformation</PermissionButton>
+          <PermissionButton onClick={handleCreateWork} className="flex-1 py-4 shadow-2xl shadow-indigo-100 font-black uppercase tracking-widest text-xs">Commit Transformation</PermissionButton>
         </div>
       }>
         <div className="p-10 space-y-8">
           <div className="grid grid-cols-2 gap-6">
-            <Combobox label="Processing Vendor" options={supplierOptions} value={formData.supplierId} onChange={id => setFormData({...formData, supplierId: id})} icon={<Truck className="w-4 h-4" />} />
-            <Combobox label="Target Stage" options={stageOptions} value={formData.stage} onChange={id => setFormData({...formData, stage: id as StockStage})} icon={<Layers className="w-4 h-4" />} />
+            <Combobox label="Service Vendor" options={supplierOptions} value={formData.supplierId} onChange={id => setFormData({...formData, supplierId: id})} icon={<Truck className="w-4 h-4" />} />
+            <Combobox label="New Stock Stage" options={stageOptions} value={formData.stage} onChange={id => setFormData({...formData, stage: id as StockStage})} icon={<Layers className="w-4 h-4" />} />
           </div>
 
-          <Combobox label="Select SOURCE Stock Batch" options={batchOptions} value={formData.sourceBatchId} onChange={id => setFormData({...formData, sourceBatchId: id})} icon={<Package className="w-4 h-4" />} />
+          <Combobox label="Select RAW Stock Batch" options={sourceBatchOptions} value={formData.sourceBatchId} onChange={id => setFormData({...formData, sourceBatchId: id})} icon={<Package className="w-4 h-4" />} />
 
           {selectedSourceBatch && (
             <div className="p-6 bg-indigo-50/50 border border-indigo-100 rounded-[2rem] flex items-center justify-between">
                <div>
-                  <p className="text-[9px] font-black text-indigo-400 uppercase tracking-widest mb-1">Inherited Unit Cost</p>
+                  <p className="text-[9px] font-black text-indigo-400 uppercase tracking-widest mb-1">Base Cost (per unit)</p>
                   <p className="text-xl font-black text-indigo-600">${selectedSourceBatch.unitCost.toLocaleString()}</p>
                </div>
                <div className="text-right">
-                  <p className="text-[9px] font-black text-indigo-400 uppercase tracking-widest mb-1">Max Processable</p>
+                  <p className="text-[9px] font-black text-indigo-400 uppercase tracking-widest mb-1">Available in Batch</p>
                   <p className="text-xl font-black text-indigo-600">{selectedSourceBatch.currentQuantity} <span className="text-xs">{selectedSourceBatch.unit}s</span></p>
                </div>
             </div>
           )}
 
           <div className="space-y-1">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Transformation Memo</label>
-            <input required value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} type="text" className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 font-bold" placeholder="e.g. 5-Color Digital Printing" />
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Work Memo</label>
+            <input required value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} type="text" className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 font-bold" placeholder="e.g. 3-Color Screen Print" />
           </div>
 
           <div className="grid grid-cols-2 gap-6">
             <div className="space-y-1">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Quantity to Process</label>
-              <div className="relative">
-                <Ruler className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
-                <input value={formData.quantity} onChange={e => setFormData({...formData, quantity: e.target.value})} type="number" className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold" placeholder="Qty" />
-              </div>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Units to Consume</label>
+              <input value={formData.quantity} onChange={e => setFormData({...formData, quantity: e.target.value})} type="number" className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold" placeholder="0.00" />
             </div>
             <div className="space-y-1">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Work Price (Per Unit)</label>
-              <div className="relative">
-                <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
-                <input value={formData.pricePerUnit} onChange={e => setFormData({...formData, pricePerUnit: e.target.value})} type="number" className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold" placeholder="Rate" />
-              </div>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Work Rate ($/unit)</label>
+              <input value={formData.pricePerUnit} onChange={e => setFormData({...formData, pricePerUnit: e.target.value})} type="number" className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold" placeholder="0.00" />
             </div>
           </div>
           
           <div className="p-6 bg-slate-900 rounded-[2.5rem] text-white flex justify-between items-center">
              <div>
-               <p className="text-[10px] font-black uppercase tracking-widest opacity-50 mb-1">Estimated Final Unit Cost</p>
+               <p className="text-[10px] font-black uppercase tracking-widest opacity-50 mb-1">Calculated TARGET Batch Unit Cost</p>
                <h4 className="text-3xl font-black tracking-tighter">
                  ${( (parseFloat(formData.pricePerUnit) || 0) + (selectedSourceBatch?.unitCost || 0) ).toLocaleString()}
                </h4>
